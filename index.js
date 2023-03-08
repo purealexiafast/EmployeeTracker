@@ -126,6 +126,80 @@ function addRole() {
 }
 
 //create employee, create 2 lists create 2 more functions
+function addEmployee() {
+    db.promise().query("SELECT * FROM role") //from schema
+        .then(roleData => {
+            db.promise().query("SELECT * FROM employee") //from schema
+                .then(employeeData => {
+                    const roleChoices = roleData[0].map(role => ({ name: role.title, value: role.id }))
+                    const employeeChoices = employeeData[0].map(employee => ({ name: employee.firstName + " " + employee.lastName, value: employee.id }))
+                    const addEmployeeQuestions = [
+                        {
+                            type: "input",
+                            name: "firstName",
+                            message: "What is the employee's first name?"
+                        },
+                        {
+                            type: "input",
+                            name: "lastName",
+                            message: "What is the employee's last name?"
+                        },
+                        {
+                            type: "list",
+                            name: "role_id",
+                            message: "What is the role of the employee?",
+                            choices: roleChoices
+                        },
+                        {
+                            type: "list",
+                            name: "manager_id",
+                            message: "What is the name of of the employee's manager?",
+                            choices: employeeChoices
+                        },
+                    ]
+                    inquirer.prompt(addEmployeeQuestions)
+                        .then(answers => {
+                            return db.promise().query("INSERT INTO employee SET ?", answers)
+                        })
+                        .then(() => {
+                            init()
+                        })
+                })
+
+        })
+}
+
+function updateEmployee() {
+    db.promise().query("SELECT * FROM role") //from schema
+        .then(roleData => {
+            db.promise().query("SELECT * FROM employee") //from schema
+                .then(employeeData => {
+                    const roleChoices = roleData[0].map(role => ({ name: role.title, value: role.id }))
+                    const employeeChoices = employeeData[0].map(employee => ({ name: employee.firstName + " " + employee.lastName, value: employee.id }))
+                    const updateEmployeeQuestions = [
+                        {
+                            type: "list",
+                            name: "id",
+                            message: "Which employee would you like to update?",
+                            choices: employeeChoices
+                        },
+                        {
+                            type: "list",
+                            name: "roleId",
+                            message: "Which role should this employee have now?",
+                            choices: roleChoices
+                        }
+                    ]
+                    inquirer.prompt(updateEmployeeQuestions)
+                        .then(answers => {
+                            return db.promise().query("UPDATE employee SET role_id = ? WHERE id = ?", [answers.roleId, answers.id])
+                        }).then(() => {
+                            init()
+                        })
+                })
+        })
+}
+
 
 function finished() {
     console.log("Goodbye")
